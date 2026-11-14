@@ -273,11 +273,10 @@ These are planned deliverables, not claims of completed results.
 ### 1. Clone the repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/abhi-shake-ds/Let_Them_Cook
 cd Let_Them_Cook
 ```
 
-Replace the placeholder with the actual repository URL.
 
 ### 2. Create a virtual environment
 
