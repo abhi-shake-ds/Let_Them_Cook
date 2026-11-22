@@ -90,7 +90,7 @@ Because `casual` and `registered` directly determine the target, they will be ex
 
 ## 📁 Repository Structure
 
-The repository will follow this structure:
+The repository has this structure:
 
 ```text
 Let_Them_Cook/
@@ -107,14 +107,18 @@ Let_Them_Cook/
 │   └── 04-evaluation.ipynb
 │
 ├── src/
-│   └── README.md
+│   ├── README.md
+│   ├── data.py              loading, chronological split, X/y separation
+│   ├── preprocessing.py     'linear' and 'forest' preprocessing pipelines
+│   └── baselines.py         persistence (same hour last week) forecast
 │
 ├── results/
-│   ├── metrics.csv
+│   ├── metrics.csv  best_params.csv
+│   ├── preds_baseline.csv  preds_models.csv
 │   └── figures/
 │
 ├── report/
-│   └── report.pdf
+│   └── report.pdf           (to be added)
 │
 ├── requirements.txt
 ├── README.md
@@ -150,10 +154,10 @@ Planned steps include:
 
 - Removing `casual`, `registered`, `dteday`, and `instant` from the predictive feature matrix.
 - Retaining `yr` as a predictor.
-- Encoding cyclical variables such as hour and month using sine and cosine transformations.
-- Comparing cyclical encoding with raw hour values and one-hot hour encoding.
+- Comparing raw, cyclical (sine/cosine) and one-hot hour encoding, and raw versus cyclical month, with `TimeSeriesSplit` on the training period.
+- Testing a one-hot **hour x working-day** encoding for the linear models (lowest cross-validated RMSE, better in all 5 folds).
 - Encoding categorical variables such as season, weather situation, and weekday.
-- Using scikit-learn's `ColumnTransformer` and `Pipeline` for preprocessing.
+- Using scikit-learn's `ColumnTransformer` and `Pipeline` for preprocessing. Two variants are used (`src/preprocessing.py`): `'linear'` (one-hot hour x working day, `atemp` dropped because it is almost identical to `temp`) for Linear/Ridge/Lasso, and `'forest'` (cyclical hour and month) for the random forest.
 - Fitting transformations and scalers on training data only.
 
 Cyclical encoding helps represent the fact that hour 23 is close to hour 0, and December is close to January.
@@ -170,7 +174,7 @@ x_{\cos}=\cos\left(\frac{2\pi x}{T}\right)
 
 The periods used will be 24 for the hour and 12 for the month.
 
-Temperature and feeling-temperature variables will be inspected in their original normalized form. Any conversion to degrees Celsius will be documented.
+Temperature is normalized in the file. Degrees Celsius are obtained with `temp * 47 - 8` (minimum -8, maximum +39 according to the UCI documentation).
 
 ### 3. Chronological Train/Test Split
 
@@ -194,11 +198,13 @@ The project will evaluate the following models:
 | Linear Regression | Establish a baseline and identify linear relationships |
 | Ridge Regression | Apply L2 regularization to reduce the impact of large coefficients |
 | Lasso Regression | Apply L1 regularization and potentially reduce less useful coefficients to zero |
-| Random Forest or Gradient Boosting | Capture nonlinear relationships and feature interactions |
+| Random Forest | Capture nonlinear relationships and feature interactions |
 
 The initial Linear Regression model will use a small feature set, including hour, temperature, working-day status, and year.
 
-Subsequent models will use engineered features and a consistent preprocessing pipeline.
+Two reference forecasts are reported next to the models: this 4-feature baseline and a **persistence** forecast (demand of the same hour one week earlier, `src/baselines.py`). A model is only useful if it beats persistence.
+
+Subsequent models use the engineered features described above.
 
 Ridge and Lasso regularization strengths will be selected through cross-validation on the training period only.
 
@@ -251,19 +257,21 @@ All models are scored on the same test period (1 July 2012 to 31 December 2012, 
 | Model | RMSE (bikes/hour) | MAE (bikes/hour) | R² |
 |---|---:|---:|---:|
 | Baseline linear regression (4 features) | 191.3 | 145.3 | 0.242 |
-| Linear regression | 165.7 | 123.9 | 0.431 |
-| Ridge | 165.7 | 123.9 | 0.431 |
-| Lasso | 165.7 | 123.9 | 0.431 |
-| Random forest | 83.7 | 56.4 | 0.855 |
+| Persistence (same hour last week) | 107.9 | 63.1 | 0.759 |
+| Linear regression | 107.1 | 80.2 | 0.762 |
+| Ridge | 107.1 | 80.2 | 0.762 |
+| Lasso | 107.1 | 80.2 | 0.762 |
+| **Random forest** | **83.5** | **56.3** | **0.856** |
 
-- The random forest is the best model. Linear, Ridge and Lasso are almost identical because cross-validation chose the smallest penalty.
-- The linear models cannot make two daily rush-hour peaks and under-predict the 8 a.m. and 5 p.m. hours by about 250 to 280 bikes. All models make their largest errors in the busiest hours.
-- Bad weather lowers demand (about 70 fewer rentals per hour in light rain or snow than in clear weather), and 2012 had about 85 more rentals per hour than 2011.
+- The random forest is the best model and the only one that clearly beats the persistence forecast (RMSE about 23% lower). The linear models only match persistence in RMSE and are worse in MAE.
+- With one-hot hour x working-day encoding the linear models improved from RMSE 165.7 to 107.1. Linear, Ridge and Lasso are almost identical because cross-validation chose the smallest penalty: with 13,003 training rows and 70 columns there is little to regularize.
+- All models make their largest errors, and under-predict, in the busiest hours (the forest is about 136 bikes too low on average in the top 10% of hours).
+- Bad weather lowers demand (about 64 fewer rentals per hour in light rain or snow than in clear weather), and 2012 had about 83 more rentals per hour than 2011.
 - RMSE is the headline metric because it is in bikes.
 
-## 📈 Expected Outcomes
+## 📈 Deliverables
 
-The project aims to produce:
+The project produces:
 
 - An exploratory analysis of hourly bike-rental demand.
 - A documented preprocessing and feature-engineering workflow.
@@ -273,7 +281,7 @@ The project aims to produce:
 - Residual plots and interpretable findings.
 - A final report describing the methodology, results, limitations, and potential applications to fleet rebalancing.
 
-These are planned deliverables, not claims of completed results.
+The final report (`report/report.pdf`) is still to be added.
 
 ## ⚙️ Installation and Setup
 
@@ -377,7 +385,6 @@ The following practices are important to ensure a reliable comparison:
 Potential extensions include:
 
 - Implementing gradient descent manually to strengthen understanding of optimization.
-- Building a persistence baseline using demand from the same hour in the previous week.
 - Classifying peak-demand versus non-peak-demand hours.
 - Comparing additional feature-engineering approaches.
 - Exploring prediction intervals or uncertainty estimates.
@@ -399,4 +406,4 @@ Potential extensions include:
 **Project:** P01 — Hourly Bike-Rental Demand for Fleet Rebalancing  
 **Team:** Let Them Cook  
 **Domain:** Machine Learning · Regression · Time-Series Forecasting  
-**Status:** In Development
+**Status:** Modelling and evaluation complete; final report to be added

@@ -26,7 +26,8 @@ Open the notebooks in the notebooks folder and run Restart and Run All, in this 
 - Chronological split: train before 2012-07-01 (13,003 rows), test from 2012-07-01 (4,376 rows).
 - casual, registered, instant and dteday are never features (casual + registered = cnt, so using them is target leakage).
 - The 165 missing hours (0.94%) are kept as missing, not filled.
-- Final pipeline: cyclic sin/cos for hour and month, one-hot for season, weathersit and weekday, StandardScaler for temp, atemp, hum and windspeed. Everything is fitted on training data only inside a Pipeline.
+- Final pipelines (`src/preprocessing.py`, everything fitted on training data only inside a Pipeline): `'linear'` for Linear, Ridge and Lasso (one-hot hour x working day, cyclic month, one-hot season, weathersit and weekday, StandardScaler for temp, hum and windspeed; atemp dropped because it is almost identical to temp). `'forest'` for the random forest (cyclic sin/cos for hour and month, one-hot for season, weathersit and weekday, StandardScaler for temp, atemp, hum and windspeed).
+- A persistence forecast (same hour last week, `src/baselines.py`) is reported next to the models.
 - Tuning: GridSearchCV with TimeSeriesSplit(5) on the training period only.
 - Random seed: random_state=42.
 
@@ -34,8 +35,8 @@ Open the notebooks in the notebooks folder and run Restart and Run All, in this 
 
 - 01-eda: figures in results/figures/
 - 02-preprocessing: hour_encoding_comparison.png and month_encoding_comparison.png
-- 03-models: results/preds_baseline.csv, results/preds_models.csv, results/best_params.csv
-- 04-evaluation: results/metrics.csv, residual_vs_hour.png, residual_vs_predicted.png, ridge_coefficients.png
+- 03-models: results/preds_baseline.csv (4-feature baseline and persistence), results/preds_models.csv, results/best_params.csv
+- 04-evaluation: results/metrics.csv, residual_vs_hour.png, residual_vs_predicted.png, ridge_coefficients.png, ridge_hour_profile.png
 
 ## Checkpoints
 
