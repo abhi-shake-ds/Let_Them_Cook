@@ -279,7 +279,7 @@ These are planned deliverables, not claims of completed results.
 
 ### Prerequisites
 
-- - The Python version listed in REPRODUCIBILITY.md (tested with Python 3.12.9).
+- The Python version listed in REPRODUCIBILITY.md (tested with Python 3.12.9).
 - Git.
 - Jupyter Notebook or JupyterLab.
 
@@ -309,7 +309,6 @@ source .venv/bin/activate
 
 ### 3. Install dependencies
 
-Create `requirements.txt` containing:
 Install the packages:
 
 ```bash
