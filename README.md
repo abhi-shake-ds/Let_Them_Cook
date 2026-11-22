@@ -114,14 +114,12 @@ Let_Them_Cook/
 │   └── figures/
 │
 ├── report/
-│   └── project-report.pdf
+│   └── report.pdf
 │
 ├── requirements.txt
 ├── README.md
 └── REPRODUCIBILITY.md
 ```
-
-*Note: The structure describes the planned organization. Files and directories should be added as the project develops. The report, metrics, and figures will be generated from the completed analysis.*
 
 ## 🔍 Project Workflow
 
@@ -246,7 +244,22 @@ Additional evaluation will include:
 
 RMSE is the planned headline metric because its units correspond directly to the number of bikes, making forecast errors easier to interpret for fleet planning.
 
-**Important:** Actual model scores and conclusions will be added after training and evaluating the models. No performance results are assumed in advance.
+## Results
+
+All models are scored on the same test period (1 July 2012 to 31 December 2012, 4,376 hours).
+
+| Model | RMSE (bikes/hour) | MAE (bikes/hour) | R² |
+|---|---:|---:|---:|
+| Baseline linear regression (4 features) | 191.3 | 145.3 | 0.242 |
+| Linear regression | 165.7 | 123.9 | 0.431 |
+| Ridge | 165.7 | 123.9 | 0.431 |
+| Lasso | 165.7 | 123.9 | 0.431 |
+| Random forest | 83.7 | 56.4 | 0.855 |
+
+- The random forest is the best model. Linear, Ridge and Lasso are almost identical because cross-validation chose the smallest penalty.
+- The linear models cannot make two daily rush-hour peaks and under-predict the 8 a.m. and 5 p.m. hours by about 250 to 280 bikes. All models make their largest errors in the busiest hours.
+- Bad weather lowers demand (about 70 fewer rentals per hour in light rain or snow than in clear weather), and 2012 had about 85 more rentals per hour than 2011.
+- RMSE is the headline metric because it is in bikes.
 
 ## 📈 Expected Outcomes
 
@@ -266,7 +279,7 @@ These are planned deliverables, not claims of completed results.
 
 ### Prerequisites
 
-- Python 3.10 or a compatible version.
+- - The Python version listed in REPRODUCIBILITY.md (tested with Python 3.12.9).
 - Git.
 - Jupyter Notebook or JupyterLab.
 
@@ -297,15 +310,6 @@ source .venv/bin/activate
 ### 3. Install dependencies
 
 Create `requirements.txt` containing:
-
-```text
-pandas
-numpy
-scikit-learn
-matplotlib
-jupyter
-```
-
 Install the packages:
 
 ```bash
@@ -314,11 +318,7 @@ pip install -r requirements.txt
 
 ### 4. Prepare the dataset
 
-Download the UCI Bike Sharing Dataset from the official source:
-
-[Download the dataset](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset)
-
-Extract the archive and place `hour.csv` and `day.csv` inside `data/raw/`.
+`hour.csv` and `day.csv` are already included in `data/raw/`, so there is nothing to download.
 
 ### 5. Run the notebooks
 
